@@ -42,15 +42,18 @@ class SendEmail extends Command
      */
     public function handle()
     {
-        $subscribers = Subscriber::all();
-        foreach ($subscribers as $subscriber) {
-            $sendedEmail = $subscriber->posts->where('is_send', 1)->pluck('id');
-            $posts = Post::where('website_id', $subscriber->website_id)->whereNotIn('id', $sendedEmail);
-            foreach ($posts->get() as $post) {
-
-                SendingEmail::dispatch($subscriber, $post);
+        $subscribers = Subscriber::chunk(1000,function($subscribers){
+            foreach ($subscribers as $subscriber) {
+                $sendedEmail = $subscriber->posts->where('is_send', 1)->pluck('id');
+                $posts = Post::where('website_id', $subscriber->website_id)->whereNotIn('id', $sendedEmail);
+    
+                $posts->chunk(1000, function (＄posts) use($subscriber) {
+                    foreach($posts as $post){
+                        SendingEmail::dispatch($subscriber, $post);
+                    }
+                });
             }
-        }
+        });
         return 0;
     }
 }
