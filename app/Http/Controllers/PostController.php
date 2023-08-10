@@ -14,9 +14,9 @@ class PostController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'title'=>'required',
-            'description'=>'required',
-            'content'=>'required',
+            'title'=>'required|max:255',
+            'description'=>'required|max:255',
+            'content'=>'required|max:255',
             'website_id'=>'exists:websites,id'
         ]);
 
